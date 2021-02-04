@@ -2,7 +2,8 @@ FROM php:7.3-alpine
 
 RUN apk add composer
 
-RUN cd /tmp && \
+RUN apk add --no-cache libstdc++ && \
+    cd /tmp && \
     apk --update-cache add --virtual build-dependencies ${PHPIZE_DEPS} php7-dev curl-dev && \
     docker-php-ext-install sockets && \
     docker-php-ext-install pdo_mysql && \
