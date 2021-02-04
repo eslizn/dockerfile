@@ -1,38 +1,15 @@
-FROM php:7-cli-alpine
+FROM php:7.3-alpine
 
-RUN cd /tmp \
-    && apk upgrade --update \
-    && apk add --no-cache \
-    libc-dev \
-    libbz2 \
-    libstdc++ \
-    musl-dev \
-    postgresql-dev \
-    nghttp2-dev \
-    git \
-    tzdata \
-    && apk add --no-cache --virtual .build-deps \
-    linux-headers \
-    autoconf \
-    gcc \
-    g++ \
-    make \
-    re2c \
-    file \
-    && docker-php-ext-install sockets pdo_mysql pdo_pgsql \
-    && pecl bundle swoole \
-    && ( \
-        cd swoole \
-        && phpize \
-        && ./configure --enable-swoole --enable-sockets --enable-openssl --enable-http2 --enable-mysqlnd --enable-coroutine-postgresql \
-        && make -j$(nproc) && make install \
-        ) \
-    && docker-php-ext-enable swoole \
-    && rm -rf /var/cache/apk/* \
-    && apk del .build-deps \
-    && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php \
-    && php -r "unlink('composer-setup.php');" \
-    && mv composer.phar /usr/bin/composer \
-    && chmod +x /usr/bin/composer \
-    && rm -r /tmp/*
+RUN cd /tmp && \
+    apk --update-cache add --virtual build-dependencies ${PHPIZE_DEPS} php7-dev curl-dev composer && \
+    docker-php-ext-install sockets && \
+    docker-php-ext-install pdo_mysql && \
+    pecl bundle swoole && \
+    cd swoole && \
+    phpize && \
+    ./configure --enable-sockets --enable-swoole --enable-mysqlnd --enable-swoole-json --enable-swoole-curl && \
+    make && make install && \
+    docker-php-ext-enable swoole && \
+    apk del build-dependencies && \
+    rm -rf /tmp/*
+    
