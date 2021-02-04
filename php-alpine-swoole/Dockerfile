@@ -1,7 +1,9 @@
 FROM php:7.3-alpine
 
+RUN apk add composer
+
 RUN cd /tmp && \
-    apk --update-cache add --virtual build-dependencies ${PHPIZE_DEPS} php7-dev curl-dev composer && \
+    apk --update-cache add --virtual build-dependencies ${PHPIZE_DEPS} php7-dev curl-dev && \
     docker-php-ext-install sockets && \
     docker-php-ext-install pdo_mysql && \
     pecl bundle swoole && \
@@ -12,4 +14,4 @@ RUN cd /tmp && \
     docker-php-ext-enable swoole && \
     apk del build-dependencies && \
     rm -rf /tmp/*
-    
+
